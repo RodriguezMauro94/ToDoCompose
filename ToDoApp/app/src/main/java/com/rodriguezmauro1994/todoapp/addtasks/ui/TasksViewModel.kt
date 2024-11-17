@@ -29,10 +29,16 @@ class TasksViewModel @Inject constructor(): ViewModel() {
         onDialogDismiss()
     }
 
-    fun onItemChecked(taskModel: TaskModel) {
-        val index = _myTasks.indexOf(taskModel)
+    fun onItemChecked(task: TaskModel) {
+        val index = _myTasks.indexOf(task)
         _myTasks[index] = _myTasks[index].let {
             it.copy(selected = !it.selected)
         }
+    }
+
+    fun onItemRemoved(task: TaskModel) {
+        _myTasks.remove(_myTasks.find {
+            it.id == task.id
+        })
     }
 }
