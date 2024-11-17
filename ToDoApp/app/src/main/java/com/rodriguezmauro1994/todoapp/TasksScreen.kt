@@ -17,6 +17,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -32,27 +33,25 @@ import androidx.compose.ui.window.Dialog
 import com.rodriguezmauro1994.todoapp.addtasks.ui.TasksViewModel
 
 @Composable
-fun TasksScreen(tasksViewModel: TasksViewModel? = null) {
+fun TasksScreen(tasksViewModel: TasksViewModel) {
+    val showDialog: Boolean by tasksViewModel.showDialog.observeAsState(initial = false)
     Box(
         modifier = Modifier.fillMaxSize()
     ) {
-        FabDialog(modifier = Modifier.align(Alignment.BottomEnd))
+        AddTasksDialog(show = showDialog, onDismiss = {
+            tasksViewModel.onDialogDismiss()
+        }, onTaskAdded = {
+            tasksViewModel.onTaskAdded(it)
+        })
+        FabDialog(tasksViewModel, modifier = Modifier.align(Alignment.BottomEnd))
     }
 }
 
 @Composable
-fun FabDialog(modifier: Modifier) {
-    var showDialog by rememberSaveable {
-        mutableStateOf(false)
-    }
+fun FabDialog(tasksViewModel: TasksViewModel, modifier: Modifier) {
     FloatingActionButton(onClick = {
-        showDialog = true
+        tasksViewModel.onShowDialog()
     }, modifier = modifier.padding(16.dp)) {
-        AddTasksDialog(show = showDialog, onDismiss = {
-            showDialog = false
-        }, onTaskAdded = { task ->
-            //TODO
-        })
         Icon(imageVector = Icons.Filled.Add, contentDescription = "Add")
     }
 }
@@ -90,10 +89,4 @@ fun AddTasksDialog(show: Boolean, onDismiss: () -> Unit, onTaskAdded: (String) -
             }
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun TasksScreenPreview() {
-    TasksScreen(null)
 }
