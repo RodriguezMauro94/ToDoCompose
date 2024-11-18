@@ -1,14 +1,17 @@
 package com.rodriguezmauro1994.todoapp.addtasks.ui
 
-import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rodriguezmauro1994.todoapp.addtasks.domain.AddTaskUseCase
 import com.rodriguezmauro1994.todoapp.addtasks.domain.GetTasksUseCase
-import com.rodriguezmauro1994.todoapp.addtasks.ui.TasksUiState.*
+import com.rodriguezmauro1994.todoapp.addtasks.ui.TasksUiState.Error
+import com.rodriguezmauro1994.todoapp.addtasks.ui.TasksUiState.Loading
+import com.rodriguezmauro1994.todoapp.addtasks.ui.TasksUiState.Success
 import com.rodriguezmauro1994.todoapp.addtasks.ui.model.TaskModel
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
@@ -17,6 +20,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+@HiltViewModel
 class TasksViewModel @Inject constructor(
     private val addTaskUseCase: AddTaskUseCase,
     val getTasksUseCase: GetTasksUseCase
@@ -35,9 +39,6 @@ class TasksViewModel @Inject constructor(
     private var _showDialog = MutableLiveData<Boolean>()
     val showDialog: LiveData<Boolean> = _showDialog
 
-    private var _myTasks = mutableStateListOf<TaskModel>()
-    val myTasks: List<TaskModel> = _myTasks
-
     fun onDialogDismiss() {
         _showDialog.value = false
     }
@@ -47,25 +48,24 @@ class TasksViewModel @Inject constructor(
     }
 
     fun onTaskAdded(task: String) {
-        val taskModel = TaskModel(task = task)
-        _myTasks.add(taskModel)
         onDialogDismiss()
-
-        viewModelScope.launch {
-            addTaskUseCase.invoke(taskModel)
+        viewModelScope.launch(Dispatchers.IO) {
+            addTaskUseCase.invoke(TaskModel(task = task))
         }
     }
 
     fun onItemChecked(task: TaskModel) {
-        val index = _myTasks.indexOf(task)
+        //FIXME
+        /*val index = _myTasks.indexOf(task)
         _myTasks[index] = _myTasks[index].let {
             it.copy(selected = !it.selected)
-        }
+        }*/
     }
 
     fun onItemRemoved(task: TaskModel) {
-        _myTasks.remove(_myTasks.find {
+        //FIXME
+        /*_myTasks.remove(_myTasks.find {
             it.id == task.id
-        })
+        })*/
     }
 }
