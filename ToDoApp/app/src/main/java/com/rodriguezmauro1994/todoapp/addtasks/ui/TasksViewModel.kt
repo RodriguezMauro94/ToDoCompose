@@ -6,6 +6,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rodriguezmauro1994.todoapp.addtasks.domain.AddTaskUseCase
 import com.rodriguezmauro1994.todoapp.addtasks.domain.GetTasksUseCase
+import com.rodriguezmauro1994.todoapp.addtasks.domain.RemoveTaskUseCase
+import com.rodriguezmauro1994.todoapp.addtasks.domain.UpdateTaskUseCase
 import com.rodriguezmauro1994.todoapp.addtasks.ui.TasksUiState.Error
 import com.rodriguezmauro1994.todoapp.addtasks.ui.TasksUiState.Loading
 import com.rodriguezmauro1994.todoapp.addtasks.ui.TasksUiState.Success
@@ -23,6 +25,8 @@ import javax.inject.Inject
 @HiltViewModel
 class TasksViewModel @Inject constructor(
     private val addTaskUseCase: AddTaskUseCase,
+    private val updateTaskUseCase: UpdateTaskUseCase,
+    private val removeTaskUseCase: RemoveTaskUseCase,
     val getTasksUseCase: GetTasksUseCase
 ) : ViewModel() {
     val uiState: StateFlow<TasksUiState> = getTasksUseCase()
@@ -55,17 +59,14 @@ class TasksViewModel @Inject constructor(
     }
 
     fun onItemChecked(task: TaskModel) {
-        //FIXME
-        /*val index = _myTasks.indexOf(task)
-        _myTasks[index] = _myTasks[index].let {
-            it.copy(selected = !it.selected)
-        }*/
+        viewModelScope.launch(Dispatchers.IO) {
+            updateTaskUseCase(taskModel = task.copy(selected = !task.selected))
+        }
     }
 
     fun onItemRemoved(task: TaskModel) {
-        //FIXME
-        /*_myTasks.remove(_myTasks.find {
-            it.id == task.id
-        })*/
+        viewModelScope.launch(Dispatchers.IO) {
+            removeTaskUseCase(task)
+        }
     }
 }
